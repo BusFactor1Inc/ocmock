@@ -29,4 +29,6 @@
 
 - (NSArray *)invocationHandlers;
 
+- (NSInvocation *)recordedInvocation;
+
 @end

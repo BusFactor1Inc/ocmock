@@ -19,7 +19,9 @@
 
 - (NSString *)description
 {
-	return [NSString stringWithFormat:@"OCMockObject[%@]", NSStringFromClass(mockedClass)];
+    return (name==nil)
+           ? [NSString stringWithFormat:@"OCMockObject[%@]", NSStringFromClass(mockedClass)]
+           : [NSString stringWithFormat:@"OCMockObject[%@](%@)",NSStringFromClass(mockedClass),name];
 }
 
 - (Class)mockedClass

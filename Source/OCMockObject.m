@@ -97,13 +97,25 @@
 
 - (NSString *)description
 {
-	return @"OCMockObject";
+    return (name==nil)?@"OCMockObject":[NSString stringWithFormat:@"OCMockObject(%@)",name];
 }
 
 
 - (void)setExpectationOrderMatters:(BOOL)flag
 {
     expectationOrderMatters = flag;
+}
+
+
+- (void)setName:(NSString *)aName
+{
+    [name release];
+    name = [aName retain];
+}
+
+- (NSString *)name
+{
+    return name;
 }
 
 
@@ -135,15 +147,32 @@
 
 - (void)verify
 {
+    for(OCMockRecorder *expectation in expectations)
+    {
+        NSInvocation *invocation = [expectation recordedInvocation];
+        if(nil == [invocation target])
+        {
+            [invocation setTarget:self];
+        }
+    }
 	if([expectations count] == 1)
 	{
-		[NSException raise:NSInternalInconsistencyException format:@"%@: expected method was not invoked: %@", 
-			[self description], [[expectations objectAtIndex:0] description]];
+        [[NSException exceptionWithName:NSInternalInconsistencyException 
+                                 reason:[NSString stringWithFormat:@"%@: expected method was not invoked: %@", 
+                                          [self description], 
+                                          [[expectations objectAtIndex:0] description]] 
+                               userInfo:[NSDictionary dictionaryWithObject:[[expectations objectAtIndex:0] recordedInvocation]
+                                                                    forKey:@"invocation"]] raise];
 	}
 	if([expectations count] > 0)
 	{
-		[NSException raise:NSInternalInconsistencyException format:@"%@ : %d expected methods were not invoked: %@", 
-			[self description], [expectations count], [self _recorderDescriptions:YES]];
+      [[NSException exceptionWithName:NSInternalInconsistencyException 
+                               reason:[NSString stringWithFormat:@"%@ : %d expected methods were not invoked: %@", 
+                                        [self description], 
+                                        [expectations count], 
+                                        [self _recorderDescriptions:YES]] 
+                             userInfo:[NSDictionary dictionaryWithObject:[expectations valueForKey:@"recodedInvocation"]
+                                                                  forKey:@"invocations"]] raise]; // Note the plural.
 	}
 	if([exceptions count] > 0)
 	{
@@ -165,7 +194,7 @@
 {
 	OCMockRecorder *recorder = nil;
 	int			   i;
-	
+
 	for(i = 0; i < [recorders count]; i++)
 	{
 		recorder = [recorders objectAtIndex:i];
@@ -176,11 +205,19 @@
 	if(i == [recorders count])
 		return NO;
 	
+    if(nil == [anInvocation target])
+    {
+        [anInvocation setTarget:self];
+    }
+    	
 	if([rejections containsObject:recorder]) 
 	{
-		NSException *exception = [NSException exceptionWithName:NSInternalInconsistencyException reason:
-								  [NSString stringWithFormat:@"%@: explicitly disallowed method invoked: %@", [self description], 
-								   [anInvocation invocationDescription]] userInfo:nil];
+		NSException *exception = [NSException exceptionWithName:NSInternalInconsistencyException 
+                                                         reason:[NSString stringWithFormat:@"%@: explicitly disallowed method invoked: %@", 
+                                                                 [self description], 
+                                                                 [anInvocation invocationDescription]] 
+                                                      userInfo:[NSDictionary dictionaryWithObject:anInvocation
+                                                                                           forKey:@"invocation"]];
 		[exceptions addObject:exception];
 		[exception raise];
 	}
@@ -189,9 +226,13 @@
 	{
 		if(expectationOrderMatters && ([expectations objectAtIndex:0] != recorder))
 		{
-			[NSException raise:NSInternalInconsistencyException	format:@"%@: unexpected method invoked: %@\n\texpected:\t%@",  
-			 [self description], [recorder description], [[expectations objectAtIndex:0] description]];
-			
+          [[NSException exceptionWithName:NSInternalInconsistencyException 
+                                   reason:[NSString stringWithFormat:@"%@: unexpected method invoked: %@\n\texpected:\t%@",  
+                                            [self description], 
+                                            [recorder description], 
+                                            [[expectations objectAtIndex:0] description]] 
+                                  userInfo:[NSDictionary dictionaryWithObject:anInvocation
+                                                                       forKey:@"invocation"]] raise];
 		}
 		[[recorder retain] autorelease];
 		[expectations removeObject:recorder];
@@ -206,9 +247,18 @@
 {
 	if(isNice == NO)
 	{
-		NSException *exception = [NSException exceptionWithName:NSInternalInconsistencyException reason:
-								  [NSString stringWithFormat:@"%@: unexpected method invoked: %@ %@",  [self description], 
-								   [anInvocation invocationDescription], [self _recorderDescriptions:NO]] userInfo:nil];
+        if(nil == [anInvocation target])
+        {
+            [anInvocation setTarget:self];
+        }
+
+		NSException *exception = [NSException exceptionWithName:NSInternalInconsistencyException 
+                                                         reason:[NSString stringWithFormat:@"%@: unexpected method invoked: %@ %@",  
+                                                                  [self description], 
+                                                                  [anInvocation invocationDescription], 
+                                                                  [self _recorderDescriptions:NO]] 
+                                                        userInfo:[NSDictionary dictionaryWithObject:anInvocation
+                                                                                             forKey:@"invocation"]];
 		[exceptions addObject:exception];
 		[exception raise];
 	}

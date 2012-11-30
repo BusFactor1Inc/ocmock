@@ -68,7 +68,9 @@ static NSMutableDictionary *mockTable;
 
 - (NSString *)description
 {
-	return [NSString stringWithFormat:@"OCPartialMockObject[%@]", NSStringFromClass(mockedClass)];
+    return (name==nil)
+           ? [NSString stringWithFormat:@"OCMockObject[%@]", NSStringFromClass(mockedClass)]
+           : [NSString stringWithFormat:@"OCMockObject[%@](%@)",NSStringFromClass(mockedClass),name];
 }
 
 - (NSObject *)realObject

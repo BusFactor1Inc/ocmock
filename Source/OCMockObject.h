@@ -13,6 +13,7 @@
 	NSMutableArray	*expectations;
 	NSMutableArray	*rejections;
 	NSMutableArray	*exceptions;
+    NSString        *name;
 }
 
 + (id)mockForClass:(Class)aClass;
@@ -27,6 +28,8 @@
 - (id)init;
 
 - (void)setExpectationOrderMatters:(BOOL)flag;
+- (void)setName:(NSString *)name;
+- (NSString *)name;
 
 - (id)stub;
 - (id)expect;

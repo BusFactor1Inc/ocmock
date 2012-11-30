@@ -46,6 +46,12 @@
 	return [recordedInvocation invocationDescription];
 }
 
+- (NSInvocation *)recordedInvocation
+{
+  return recordedInvocation;
+}
+
+
 - (void)releaseInvocation
 {
 	[recordedInvocation release];

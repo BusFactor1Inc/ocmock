@@ -21,7 +21,9 @@
 
 - (NSString *)description
 {
-	return [NSString stringWithFormat:@"OCMockObject[%s]", [mockedProtocol name]];
+    return (name==nil)
+           ? [NSString stringWithFormat:@"OCMockObject[%s]", [mockedProtocol name]]
+           : [NSString stringWithFormat:@"OCMockObject[%s](%@)",[mockedProtocol name],name];
 }
 
 
