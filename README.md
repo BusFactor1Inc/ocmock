@@ -7,3 +7,9 @@ If you are unfamiliar with the concept of mock objects, please visit [mockobject
 
   [1]: http://ocmock.org/
   [2]: http://www.mockobjects.com/
+
+--
+Could you give an example of what your system does that makes it either easier, better, or more 'lispy' than the rest?
+
+--
+Burton Samograd
